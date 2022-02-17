@@ -35,11 +35,12 @@ class RAGSEnv(gym.Env):
     when the agent receives which reward.
     """
 
-    def __init__(self, k=(5, 3, 3)) -> None:
+    def __init__(self, dim) -> None:
         self.__version__ = "0.0.1"
         logging.info(f"RAGSEnv - Version {self.__version__}")
 
         # General variables defining the graphs
+        k = dim
         self.TOTAL_TIME_STEPS = (k[0] * (k[0] - 1)) // 2
         self.curr_step = 0
         self.is_graph_colored = False
