@@ -127,7 +127,7 @@ class RAGSEnv(gym.Env):
         if self.is_graph_colored and not self.is_clique_found:
             return 1000
         elif self.is_clique_found:
-            return 0
+            return -self.curr_step
         else:
             return 1
 
