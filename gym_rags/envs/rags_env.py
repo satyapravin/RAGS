@@ -50,6 +50,7 @@ class RAGSEnv(gym.Env):
         self.action_space = spaces.Discrete(2)
 
         space_dim = [3]*self.TOTAL_TIME_STEPS
+        self.action_space = spaces.MultiBinary(1)
         self.observation_space = spaces.MultiDiscrete(space_dim)
         self.state = np.zeros(self.TOTAL_TIME_STEPS)
         self.red_graph = networkx.convert_matrix.from_numpy_array(np.zeros((k[0], k[0])))
