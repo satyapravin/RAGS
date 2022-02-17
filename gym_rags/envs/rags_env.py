@@ -150,4 +150,4 @@ class RAGSEnv(gym.Env):
         g = networkx.compose(self.red_graph, self.green_graph)
         edges = g.edges()
         colors = [g[u][v]['color'] for u, v in edges]
-        networkx.draw_circular(g, edges=edges, edge_color=colors)
+        networkx.draw_circular(g, edge_color=colors)
