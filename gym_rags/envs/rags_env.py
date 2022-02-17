@@ -45,6 +45,7 @@ class RAGSEnv(gym.Env):
         self.curr_step = 0
         self.is_graph_colored = False
         self.is_clique_found = False
+        self.is_done = False
 
         # Every edge can be RED - 0 or GREEN - 1
         self.action_space = spaces.Discrete(2)
@@ -100,36 +101,38 @@ class RAGSEnv(gym.Env):
                  However, official evaluations of your agent are not allowed to
                  use this for learning.
         """
-        if self.is_graph_colored:
+        if self.is_done:
             raise RuntimeError("Episode is done")
         self.curr_step += 1
         self._take_action(action)
         reward = self._get_reward()
-        return self.state.tolist(), reward, self.is_graph_colored | self.is_clique_found, {}
+        return self.state.tolist(), reward, self.is_done, {}
 
     def _take_action(self, action: int) -> None:
         self.action_episode_memory[self.curr_episode].append(action)
-        self.state[self.curr_step - 1] = action + 1
-        idx = self.indices[self.curr_step - 1]
+        cell_idx = (self.curr_step - 1) % self.TOTAL_TIME_STEPS
+        self.state[cell_idx] = action + 1
+        idx = self.indices[cell_idx]
 
         if action == 0:
             self.red_graph.add_edge(idx[0], idx[1], color='r')
         else:
-            self.green_graph.add_edge(idx[0], idx[1], color='g')
+            self.green_graph.add_edge(idx[0], idx[1], color='b')
 
-        self.is_graph_colored = self.curr_step == self.TOTAL_TIME_STEPS
+        self.is_graph_colored = self.curr_step >= self.TOTAL_TIME_STEPS
         rc = clique.graph_clique_number(self.red_graph)
         gc = clique.graph_clique_number(self.green_graph)
         self.is_clique_found = not (rc < self.red_clique_size and gc < self.green_clique_size)
+        self.is_done = self.is_graph_colored and not self.is_clique_found
 
     def _get_reward(self) -> float:
         """Reward is given for a colored edge."""
         if self.is_graph_colored and not self.is_clique_found:
             return 1000
         elif self.is_clique_found:
-            return -self.curr_step
+            return -1
         else:
-            return 1
+            return 0
 
     def reset(self) -> List[int]:
         """
@@ -145,6 +148,7 @@ class RAGSEnv(gym.Env):
         self.action_episode_memory.append([])
         self.is_graph_colored = False
         self.is_clique_found = False
+        self.is_done = False
         self.state = np.zeros(self.TOTAL_TIME_STEPS)
         self.red_graph.remove_edges_from(self.red_graph.edges())
         self.green_graph.remove_edges_from(self.green_graph.edges())
