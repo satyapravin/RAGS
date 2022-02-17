@@ -144,6 +144,8 @@ class RAGSEnv(gym.Env):
         self.is_graph_colored = False
         self.is_clique_found = False
         self.state = np.zeros(self.TOTAL_TIME_STEPS)
+        self.red_graph.remove_edges_from(self.red_graph.edges())
+        self.green_graph.remove_edges_from(self.green_graph.edges())
         return self.state.tolist()
 
     def render(self, mode="human"):
