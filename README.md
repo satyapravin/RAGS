@@ -17,7 +17,7 @@ pip install -e .
 import gym
 import gym_rags
 
-env = gym.make('RAGS-v0')
+env = gym.make('RAGS-v0', dim=(5,3,3)) # Graph with 5 nodes and no 3 red or green cliques.
 ```
 
 See https://github.com/matthiasplappert/keras-rl/tree/master/examples for some examples.
