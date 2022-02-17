@@ -103,7 +103,7 @@ class RAGSEnv(gym.Env):
         self.curr_step += 1
         self._take_action(action)
         reward = self._get_reward()
-        return self.state.tolist(), reward, self.is_graph_colored, {}
+        return self.state.tolist(), reward, self.is_graph_colored | self.is_clique_found, {}
 
     def _take_action(self, action: int) -> None:
         self.action_episode_memory[self.curr_episode].append(action)
@@ -111,9 +111,9 @@ class RAGSEnv(gym.Env):
         idx = self.indices[self.curr_step - 1]
 
         if action == 0:
-            self.red_graph.add_edge(idx[0], idx[1])
+            self.red_graph.add_edge(idx[0], idx[1], color=0)
         else:
-            self.green_graph.add_edge(idx[0], idx[1])
+            self.green_graph.add_edge(idx[0], idx[1], color=1)
 
         self.is_graph_colored = self.curr_step == self.TOTAL_TIME_STEPS
         rc = clique.graph_clique_number(self.red_graph)
@@ -147,4 +147,5 @@ class RAGSEnv(gym.Env):
         return self.state.tolist()
 
     def render(self, mode="human"):
-        networkx.draw_circular(self.red_graph)
+        g = networkx.compose(self.red_graph, self.green_graph)
+        networkx.draw_circular(g)
