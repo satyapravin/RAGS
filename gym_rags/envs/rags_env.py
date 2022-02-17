@@ -125,9 +125,9 @@ class RAGSEnv(gym.Env):
         if self.is_graph_colored and not self.is_clique_found:
             return 1000
         elif self.is_clique_found:
-            return -1000
+            return 0
         else:
-            return self.curr_step
+            return 1
 
     def reset(self) -> List[int]:
         """
