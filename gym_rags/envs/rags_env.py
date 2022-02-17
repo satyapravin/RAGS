@@ -118,7 +118,7 @@ class RAGSEnv(gym.Env):
         self.is_graph_colored = self.curr_step == self.TOTAL_TIME_STEPS
         rc = clique.graph_clique_number(self.red_graph)
         gc = clique.graph_clique_number(self.green_graph)
-        self.is_clique_found = ~(rc < self.red_clique_size and gc < self.green_clique_size)
+        self.is_clique_found = not (rc < self.red_clique_size and gc < self.green_clique_size)
 
     def _get_reward(self) -> float:
         """Reward is given for a colored edge."""
