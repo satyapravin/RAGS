@@ -111,9 +111,9 @@ class RAGSEnv(gym.Env):
         idx = self.indices[self.curr_step - 1]
 
         if action == 0:
-            self.red_graph.add_edge(idx[0], idx[1], color=0)
+            self.red_graph.add_edge(idx[0], idx[1], color='r')
         else:
-            self.green_graph.add_edge(idx[0], idx[1], color=1)
+            self.green_graph.add_edge(idx[0], idx[1], color='g')
 
         self.is_graph_colored = self.curr_step == self.TOTAL_TIME_STEPS
         rc = clique.graph_clique_number(self.red_graph)
@@ -148,4 +148,6 @@ class RAGSEnv(gym.Env):
 
     def render(self, mode="human"):
         g = networkx.compose(self.red_graph, self.green_graph)
-        networkx.draw_circular(g)
+        edges = g.edges()
+        colors = [g[u][v]['color'] for u, v in edges]
+        networkx.draw_circular(g, edges=edges, edge_color=colors)
