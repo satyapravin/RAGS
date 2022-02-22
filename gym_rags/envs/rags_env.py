@@ -69,7 +69,7 @@ class RAGSEnv(gym.Env):
 
         # Store what the agent tried
         self.curr_episode = -1
-        self.action_episode_memory: List[Any] = []
+        # self.action_episode_memory: List[Any] = []
 
     def step(self, action: int) -> Tuple[List[int], float, bool, Dict[Any, Any]]:
         """
@@ -109,7 +109,7 @@ class RAGSEnv(gym.Env):
         return self.state.tolist(), reward, self.is_done, {}
 
     def _take_action(self, action: int) -> None:
-        self.action_episode_memory[self.curr_episode].append(action)
+        # self.action_episode_memory[self.curr_episode].append(action)
         cell_idx = (self.curr_step - 1) % self.TOTAL_TIME_STEPS
         self.state[cell_idx] = action + 1
         idx = self.indices[cell_idx]
@@ -127,9 +127,10 @@ class RAGSEnv(gym.Env):
 
     def _get_reward(self) -> float:
         """Reward is given for a colored edge."""
-        if self.is_graph_colored and not self.is_clique_found:
+        if self.is_done:
             return 1000
         elif self.is_clique_found:
+            self.curr_step = 0
             return 0
         else:
             return 1
@@ -145,7 +146,7 @@ class RAGSEnv(gym.Env):
         """
         self.curr_step = 0
         self.curr_episode += 1
-        self.action_episode_memory.append([])
+        # self.action_episode_memory.append([])
         self.is_graph_colored = False
         self.is_clique_found = False
         self.is_done = False
