@@ -8,8 +8,6 @@ Each episode is coloring a complete graph.
 
 # Core Library
 import logging.config
-import math
-import random
 from typing import Any, Dict, List, Tuple
 
 # Third party
@@ -35,43 +33,72 @@ class RAGSEnv(gym.Env):
     when the agent receives which reward.
     """
 
-    def __init__(self, dim) -> None:
+    def __init__(self, start_size, max_size, red_clique, blue_clique) -> None:
         self.__version__ = "0.0.1"
         logging.info(f"RAGSEnv - Version {self.__version__}")
 
-        # General variables defining the graphs
-        k = dim
-        self.TOTAL_TIME_STEPS = (k[0] * (k[0] - 1)) // 2
-        self.curr_step = 0
-        self.is_graph_colored = False
-        self.is_clique_found = False
+        self.start_size_param = start_size
+        self.max_size_param = max_size
+        self.red_clique_param = red_clique
+        self.blue_clique_param = blue_clique
+        self.max_nodes = 0
+        self.curr_size = 0
+        self.num_success = 0
+        self.is_red_clique_found = False
+        self.is_blue_clique_found = False
         self.is_done = False
-
-        # Every edge can be RED - 0 or GREEN - 1
-        self.action_space = spaces.Discrete(2)
-
-        space_dim = [3]*self.TOTAL_TIME_STEPS
-        self.action_space = spaces.MultiBinary(1)
-        self.observation_space = spaces.MultiDiscrete(space_dim)
-        self.state = np.zeros(self.TOTAL_TIME_STEPS)
-        self.red_graph = networkx.convert_matrix.from_numpy_array(np.zeros((k[0], k[0])))
-        self.green_graph = networkx.convert_matrix.from_numpy_array(np.zeros((k[0], k[0])))
-        self.red_clique_size = k[1]
-        self.green_clique_size = k[2]
+        self.CURRENT_EDGES = 0
+        self.MAX_EDGES = 0
+        self.curr_step = -1
+        self.max_nodes = 0
+        self.red_clique_size = 0
+        self.blue_clique_size = 0
+        self.state = None
+        self.red_graph = None
+        self.blue_graph = None
+        self._init()
 
         # Generate indices from state into graph matrix
         self.indices = {}
         counter = 0
-        for k1 in range(0, k[0]):
-            for k2 in range(0, k1+1):
-                self.indices[counter] = (k1+1, k2)
+        for k1 in range(0, self.MAX_EDGES):
+            for k2 in range(0, k1):
+                self.indices[counter] = (k1, k2)
                 counter = counter + 1
 
         # Store what the agent tried
         self.curr_episode = -1
         # self.action_episode_memory: List[Any] = []
 
-    def step(self, action: int) -> Tuple[List[int], float, bool, Dict[Any, Any]]:
+    def _init(self) -> None:
+        self.max_nodes = self.max_size_param
+        self.curr_size = self.start_size_param
+        self.num_success = 0
+        self.is_red_clique_found = False
+        self.is_blue_clique_found = False
+        self.is_done = False
+        self.CURRENT_EDGES = (self.curr_size * (self.curr_size - 1)) // 2
+        self.MAX_EDGES = (self.max_nodes * (self.max_nodes - 1)) // 2
+
+        # Every edge can be RED - 0 or BLUE - 1
+        self.action_space = spaces.MultiDiscrete(self.MAX_EDGES, 2)
+        self.observation_space = spaces.Dict({"current": spaces.Box(low=np.zeros(self.CURRENT_EDGES),
+                                                                    high=np.ones(self.CURRENT_EDGES) * 2,
+                                                                    dtype=np.int8),
+                                              "universe": spaces.Box(low=np.zeros(self.MAX_EDGES),
+                                                                     high=np.ones(self.MAX_EDGES) * 2,
+                                                                     dtype=np.int8),
+                                              "red_clique": spaces.MultiBinary(1),
+                                              "blue_clique": spaces.MultiBinary(1)
+                                              })
+
+        self.state = np.zeros(self.MAX_EDGES)
+        self.red_graph = networkx.convert_matrix.from_numpy_array(np.zeros((self.CURRENT_EDGES, self.CURRENT_EDGES)))
+        self.blue_graph = networkx.convert_matrix.from_numpy_array(np.zeros((self.CURRENT_EDGES, self.CURRENT_EDGES)))
+        self.red_clique_size = self.red_clique_param
+        self.blue_clique_size = self.blue_clique_param
+
+    def step(self, action: Tuple[int, int]) -> Tuple[Dict[Any, Any], float, bool, Dict[Any, Any]]:
         """
         The agent takes a step in the environment.
 
@@ -103,39 +130,75 @@ class RAGSEnv(gym.Env):
         """
         if self.is_done:
             raise RuntimeError("Episode is done")
-        self.curr_step += 1
-        self._take_action(action)
-        reward = self._get_reward()
-        return self.state.tolist(), reward, self.is_done, {}
+        reward = self._take_action(action)
+        obs = dict(current=self.state[:self.CURRENT_EDGES].tolist(),
+                   universe=self.state.tolist(),
+                   red_clique=self.is_red_clique_found,
+                   blue_clique=self.is_blue_clique_found)
+        return obs, reward, self.is_done, dict(red_graph=self.red_graph, blue_graph=self.blue_graph)
 
-    def _take_action(self, action: int) -> None:
-        # self.action_episode_memory[self.curr_episode].append(action)
-        cell_idx = (self.curr_step - 1) % self.TOTAL_TIME_STEPS
-        self.state[cell_idx] = action + 1
-        idx = self.indices[cell_idx]
+    def _take_action(self, action: Tuple[int, int]) -> int:
+        cell_idx = action[0]
+        action_idx = action[1] + 1
+        reward = 0
+        idx = 0
+        if cell_idx < self.MAX_EDGES:
+            idx = self.indices[cell_idx]
 
-        if action == 0:
-            self.red_graph.add_edge(idx[0], idx[1], color='r')
+        if cell_idx >= self.CURRENT_EDGES:
+            reward = -10  # punish for coloring edge beyond current edge
+        elif action_idx not in [1, 2]:
+            reward = -10  # punish for wrong color (if that ever happens)
+        elif self.state[cell_idx] == action_idx:
+            reward = 0    # no reward for recoloring to same
         else:
-            self.green_graph.add_edge(idx[0], idx[1], color='b')
+            recolored = self.state[cell_idx] > 0 and not self.is_blue_clique_found and not self.is_red_clique_found
+            self._color_edge(idx[0], idx[1], action_idx)
+            if recolored:
+                if self.is_red_clique_found or self.is_blue_clique_found:
+                    reward = -1   # punish for recoloring when no cliques and resulting in a clique
+                else:
+                    reward = 0    # no reward for recoloring an existing edge with no impact
+            else:
+                if not self.is_blue_clique_found and not self.is_blue_clique_found:
+                    if np.all(self.state[:self.CURRENT_EDGES].astype(bool)):
+                        self.num_success = np.count_nonzero(self.state[:self.CURRENT_EDGES])
 
-        self.is_graph_colored = self.curr_step >= self.TOTAL_TIME_STEPS
-        rc = clique.graph_clique_number(self.red_graph)
-        gc = clique.graph_clique_number(self.green_graph)
-        self.is_clique_found = not (rc < self.red_clique_size and gc < self.green_clique_size)
-        self.is_done = self.is_graph_colored and not self.is_clique_found
+                        if self.curr_size < self.max_nodes:
+                            reward = self.CURRENT_EDGES  # successfully colored all edges so far without clique
+                            self.red_graph.add_node(self.curr_size)
+                            self.blue_graph.add_node(self.curr_size)
+                            self.curr_size += 1
+                            self.CURRENT_EDGES = (self.curr_size * (self.curr_size - 1)) // 2
+                        else:
+                            reward = self.MAX_EDGES * 100  # successful reached goal
+                            self.is_done = True
+                    else:
+                        if np.count_nonzero(self.state[:self.CURRENT_EDGES]) > self.num_success:
+                            reward = 1
+                            self.num_success = np.count_nonzero(self.state[:self.CURRENT_EDGES])
+                else:
+                    reward = 0  # zero reward for making a clique
 
-    def _get_reward(self) -> float:
-        """Reward is given for a colored edge."""
-        if self.is_done:
-            return 1000
-        elif self.is_clique_found:
-            self.curr_step = 0
-            return 0
+        return reward
+
+    def _color_edge(self, n1, n2, color):
+        if color == 1:
+            g = self.red_graph
+            color_char = 'r'
         else:
-            return 1
+            g = self.blue_graph
+            color_char = 'b'
 
-    def reset(self) -> List[int]:
+        if not g.has_edge(n1, n2):
+            g.add_edge(n1, n2, color=color_char)
+        else:
+            networkx.set_edge_attributes(g, {(n1, n2): {"color": color_char}})
+
+        self.is_red_clique_found = clique.graph_clique_number(self.red_graph) >= self.red_clique_size
+        self.is_blue_clique_found = clique.graph_clique_number(self.blue_graph) >= self.blue_clique_size
+
+    def reset(self, seed=42) -> tuple[Any, ...]:
         """
         Reset the state of the environment and returns an initial observation.
 
@@ -144,19 +207,27 @@ class RAGSEnv(gym.Env):
         observation: List[int]
             The initial observation of the space.
         """
-        self.curr_step = 0
-        self.curr_episode += 1
-        # self.action_episode_memory.append([])
-        self.is_graph_colored = False
-        self.is_clique_found = False
-        self.is_done = False
-        self.state = np.zeros(self.TOTAL_TIME_STEPS)
-        self.red_graph.remove_edges_from(self.red_graph.edges())
-        self.green_graph.remove_edges_from(self.green_graph.edges())
-        return self.state.tolist()
+        self._init()
+        np.random.seed(seed)
+        self.state = np.random.randint(self.MAX_EDGES)
+        self._build_graph()
+        return tuple(dict(current=self.state[:self.CURRENT_EDGES].tolist(),
+                          universe=self.state.tolist(),
+                          red_clique=False,
+                          blue_clique=False))
+
+    def _build_graph(self):
+        for counter, idx in enumerate(range(self.state[:self.CURRENT_EDGES])):
+            n1, n2 = self.indices[counter]
+            if idx == 1:
+                self.red_graph.add_edge(n1, n2, color='r')
+            elif idx == 2:
+                self.blue_graph.add_edge(n1, n2, color='b')
+            else:
+                pass
 
     def render(self, mode="human"):
-        g = networkx.compose(self.red_graph, self.green_graph)
+        g = networkx.compose(self.red_graph, self.blue_graph)
         edges = g.edges()
         colors = [g[u][v]['color'] for u, v in edges]
         networkx.draw_circular(g, edge_color=colors)
