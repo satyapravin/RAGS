@@ -209,12 +209,12 @@ class RAGSEnv(gym.Env):
         """
         self._init()
         np.random.seed(seed)
-        self.state = np.random.randint(self.MAX_EDGES)
+        self.state[:self.CURRENT_EDGES] = np.random.randint(low=0, high=3, size=self.CURRENT_EDGES)
         self._build_graph()
         return tuple(dict(current=self.state[:self.CURRENT_EDGES].tolist(),
                           universe=self.state.tolist(),
-                          red_clique=False,
-                          blue_clique=False))
+                          red_clique=self.is_red_clique_found,
+                          blue_clique=self.is_blue_clique_found))
 
     def _build_graph(self):
         for counter, idx in enumerate(range(self.state[:self.CURRENT_EDGES])):
@@ -225,6 +225,9 @@ class RAGSEnv(gym.Env):
                 self.blue_graph.add_edge(n1, n2, color='b')
             else:
                 pass
+
+        self.is_red_clique_found = clique.graph_clique_number(self.red_graph) >= self.red_clique_size
+        self.is_blue_clique_found = clique.graph_clique_number(self.blue_graph) >= self.blue_clique_size
 
     def render(self, mode="human"):
         g = networkx.compose(self.red_graph, self.blue_graph)
