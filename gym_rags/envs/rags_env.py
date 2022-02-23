@@ -198,7 +198,7 @@ class RAGSEnv(gym.Env):
         self.is_red_clique_found = clique.graph_clique_number(self.red_graph) >= self.red_clique_size
         self.is_blue_clique_found = clique.graph_clique_number(self.blue_graph) >= self.blue_clique_size
 
-    def reset(self, seed=42) -> tuple[Any, ...]:
+    def reset(self, seed=42) -> tuple[Dict[Any, Any], Dict[Any, Any]]:
         """
         Reset the state of the environment and returns an initial observation.
 
@@ -211,10 +211,12 @@ class RAGSEnv(gym.Env):
         np.random.seed(seed)
         self.state[:self.CURRENT_EDGES] = np.random.randint(low=0, high=3, size=self.CURRENT_EDGES)
         self._build_graph()
-        return tuple(dict(current=self.state[:self.CURRENT_EDGES].tolist(),
-                          universe=self.state.tolist(),
-                          red_clique=self.is_red_clique_found,
-                          blue_clique=self.is_blue_clique_found))
+        obs = dict(current=self.state[:self.CURRENT_EDGES].tolist(),
+                   universe=self.state.tolist(),
+                   red_clique=self.is_red_clique_found,
+                   blue_clique=self.is_blue_clique_found)
+        info = dict(red_graph=self.red_graph, blue_graph=self.blue_graph)
+        return obs, info
 
     def _build_graph(self):
         for counter, idx in enumerate(range(self.state[:self.CURRENT_EDGES])):
