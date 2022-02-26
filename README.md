@@ -21,8 +21,6 @@ import gym_rags
 env = gym.make('RAGS-v0', start_size=8, max_size=43, red_clique=5, blue_clique=5) 
 ```
 
-See https://github.com/matthiasplappert/keras-rl/tree/master/examples for some examples.
-
 
 ## The Environment
 
