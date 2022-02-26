@@ -17,7 +17,7 @@ pip install -e .
 import gym
 import gym_rags
 
-# Graph with 8 nodes and no 5 red or green cliques.
+# Graph with 8 nodes and no K5 red or K5 green cliques.
 env = gym.make('RAGS-v0', start_size=8, max_size=43, red_clique=5, blue_clique=5) 
 ```
 
