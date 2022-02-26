@@ -88,8 +88,8 @@ class RAGSEnv(gym.Env):
                                               "universe": spaces.Box(low=np.zeros(self.MAX_EDGES),
                                                                      high=np.ones(self.MAX_EDGES) * 2,
                                                                      dtype=np.int8),
-                                              "red_clique": spaces.MultiBinary(1),
-                                              "blue_clique": spaces.MultiBinary(1)
+                                              "red_clique_found": spaces.MultiBinary(1),
+                                              "blue_clique_found": spaces.MultiBinary(1),
                                               })
 
         self.state = np.zeros(self.MAX_EDGES)
