@@ -33,7 +33,7 @@ class RAGSEnv(gym.Env):
     when the agent receives which reward.
     """
 
-    def __init__(self, start_size, max_size, red_clique, blue_clique) -> None:
+    def __init__(self, start_size, max_size, red_clique, blue_clique):
         self.__version__ = "0.0.1"
         logging.info(f"RAGSEnv - Version {self.__version__}")
 
@@ -70,7 +70,7 @@ class RAGSEnv(gym.Env):
         self.curr_episode = -1
         # self.action_episode_memory: List[Any] = []
 
-    def _init(self) -> None:
+    def _init(self):
         self.max_nodes = self.max_size_param
         self.curr_size = self.start_size_param
         self.num_success = 0
@@ -98,7 +98,7 @@ class RAGSEnv(gym.Env):
         self.red_clique_size = self.red_clique_param
         self.blue_clique_size = self.blue_clique_param
 
-    def step(self, action: Tuple[int, int]) -> Tuple[Dict[Any, Any], float, bool, Dict[Any, Any]]:
+    def step(self, action: Tuple[int, int]):
         """
         The agent takes a step in the environment.
 
@@ -137,7 +137,7 @@ class RAGSEnv(gym.Env):
                    blue_clique=self.is_blue_clique_found)
         return obs, reward, self.is_done, dict(red_graph=self.red_graph, blue_graph=self.blue_graph)
 
-    def _take_action(self, action: Tuple[int, int]) -> int:
+    def _take_action(self, action: Tuple[int, int]):
         cell_idx = action[0]
         action_idx = action[1] + 1
         reward = 0
@@ -199,7 +199,7 @@ class RAGSEnv(gym.Env):
         self.is_red_clique_found = clique.graph_clique_number(self.red_graph) >= self.red_clique_size
         self.is_blue_clique_found = clique.graph_clique_number(self.blue_graph) >= self.blue_clique_size
 
-    def reset(self, seed=42) -> tuple[Dict[Any, Any], Dict[Any, Any]]:
+    def reset(self, seed=42):
         """
         Reset the state of the environment and returns an initial observation.
 
