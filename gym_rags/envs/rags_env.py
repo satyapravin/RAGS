@@ -161,7 +161,7 @@ class RAGSEnv(gym.Env):
                 else:
                     reward = 0    # no reward for recoloring an existing edge with no impact
             else:
-                if not self.is_blue_clique_found and not self.is_blue_clique_found:
+                if not self.is_red_clique_found and not self.is_blue_clique_found:
                     if np.all(self.state[:self.CURRENT_EDGES].astype(bool)):
                         self.num_success = np.count_nonzero(self.state[:self.CURRENT_EDGES])
 
