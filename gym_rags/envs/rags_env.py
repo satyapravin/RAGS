@@ -81,7 +81,7 @@ class RAGSEnv(gym.Env):
         self.MAX_EDGES = (self.max_nodes * (self.max_nodes - 1)) // 2
 
         # Every edge can be RED - 0 or BLUE - 1
-        self.action_space = spaces.MultiDiscrete(self.MAX_EDGES, 2)
+        self.action_space = spaces.MultiDiscrete([self.MAX_EDGES, 2])
         self.observation_space = spaces.Dict({"current": spaces.Box(low=np.zeros(self.CURRENT_EDGES),
                                                                     high=np.ones(self.CURRENT_EDGES) * 2,
                                                                     dtype=np.int8),
@@ -93,8 +93,8 @@ class RAGSEnv(gym.Env):
                                               })
 
         self.state = np.zeros(self.MAX_EDGES)
-        self.red_graph = networkx.convert_matrix.from_numpy_array(np.zeros((self.CURRENT_EDGES, self.CURRENT_EDGES)))
-        self.blue_graph = networkx.convert_matrix.from_numpy_array(np.zeros((self.CURRENT_EDGES, self.CURRENT_EDGES)))
+        self.red_graph = networkx.convert_matrix.from_numpy_array(np.zeros((self.max_nodes, self.max_nodes)))
+        self.blue_graph = networkx.convert_matrix.from_numpy_array(np.zeros((self.max_nodes, self.max_nodes)))
         self.red_clique_size = self.red_clique_param
         self.blue_clique_size = self.blue_clique_param
 
@@ -153,6 +153,7 @@ class RAGSEnv(gym.Env):
             reward = 0    # no reward for recoloring to same
         else:
             recolored = self.state[cell_idx] > 0 and not self.is_blue_clique_found and not self.is_red_clique_found
+            self.state[cell_idx] = action_idx
             self._color_edge(idx[0], idx[1], action_idx)
             if recolored:
                 if self.is_red_clique_found or self.is_blue_clique_found:
@@ -179,22 +180,22 @@ class RAGSEnv(gym.Env):
                             self.num_success = np.count_nonzero(self.state[:self.CURRENT_EDGES])
                 else:
                     reward = 0  # zero reward for making a clique
-
         return reward
 
     def _color_edge(self, n1, n2, color):
         if color == 1:
             g = self.red_graph
             color_char = 'r'
-        else:
+        elif color == 2:
             g = self.blue_graph
             color_char = 'b'
+        else:
+            assert "Invalid color"
 
         if not g.has_edge(n1, n2):
             g.add_edge(n1, n2, color=color_char)
         else:
             networkx.set_edge_attributes(g, {(n1, n2): {"color": color_char}})
-
         self.is_red_clique_found = clique.graph_clique_number(self.red_graph) >= self.red_clique_size
         self.is_blue_clique_found = clique.graph_clique_number(self.blue_graph) >= self.blue_clique_size
 
@@ -209,7 +210,7 @@ class RAGSEnv(gym.Env):
         """
         self._init()
         np.random.seed(seed)
-        self.state[:self.CURRENT_EDGES] = np.random.randint(low=0, high=3, size=self.CURRENT_EDGES)
+        self.state[:] = 0
         self._build_graph()
         obs = dict(current=self.state[:self.CURRENT_EDGES].tolist(),
                    universe=self.state.tolist(),
@@ -219,8 +220,10 @@ class RAGSEnv(gym.Env):
         return obs, info
 
     def _build_graph(self):
-        for counter, idx in enumerate(range(self.state[:self.CURRENT_EDGES])):
+        counter = 0
+        for idx in self.state[:self.CURRENT_EDGES]:
             n1, n2 = self.indices[counter]
+            counter += 1
             if idx == 1:
                 self.red_graph.add_edge(n1, n2, color='r')
             elif idx == 2:
