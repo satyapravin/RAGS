@@ -158,11 +158,13 @@ class RAGSEnv(gym.Env):
             if recolored_cliq:
                 if not self.is_red_clique_found and not self.is_blue_clique_found:
                     reward = 10
+                else:
+                    reward = 0
             if recolored_free:
                 if self.is_red_clique_found or self.is_blue_clique_found:
                     reward = -10   # punish for recoloring when no cliques and resulting in a clique
                 else:
-                    reward = 0
+                    reward = -1
             else:
                 if not self.is_red_clique_found and not self.is_blue_clique_found:
                     if np.all(self.state[:self.CURRENT_EDGES].astype(bool)):
