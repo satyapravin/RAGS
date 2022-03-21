@@ -180,13 +180,9 @@ class RAGSEnv(gym.Env):
                             reward = self.MAX_EDGES * 100  # successful reached goal
                             self.is_done = True
                     else:
-                        if np.count_nonzero(self.state[:self.CURRENT_EDGES]) > self.num_success:
-                            reward = 1
-                            self.num_success = np.count_nonzero(self.state[:self.CURRENT_EDGES])
-                        else:
-                            reward = 0
+                        reward = 1
                 else:
-                    reward = 0  # zero reward for making a clique
+                    reward = -1  # zero reward for making a clique
         return reward
 
     def _color_edge(self, n1, n2, color):
