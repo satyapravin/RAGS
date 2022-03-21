@@ -145,9 +145,6 @@ class RAGSEnv(gym.Env):
         if cell_idx < self.MAX_EDGES:
             idx = self.indices[cell_idx]
 
-        recolored_cliq = self.state[cell_idx] > 0 and (self.is_blue_clique_found or self.is_red_clique_found)
-        recolored_free = self.state[cell_idx] > 0 and not self.is_blue_clique_found and not self.is_red_clique_found
-
         if cell_idx >= self.CURRENT_EDGES:
             reward = -10  # punish for coloring edge beyond current edge
         elif action_idx not in [1, 2]:
@@ -155,36 +152,26 @@ class RAGSEnv(gym.Env):
         else:
             self.state[cell_idx] = action_idx
             self._color_edge(idx[0], idx[1], action_idx)
-            if recolored_cliq:
-                if not self.is_red_clique_found and not self.is_blue_clique_found:
-                    reward = 1
-                else:
-                    reward = 0
-            if recolored_free:
-                if self.is_red_clique_found or self.is_blue_clique_found:
-                    reward = -10  # punish for recoloring when no cliques and resulting in a clique
-                else:
-                    reward = -10
-            else:
-                if not self.is_red_clique_found and not self.is_blue_clique_found:
-                    if np.all(self.state[:self.CURRENT_EDGES].astype(bool)):
-                        self.num_success = np.count_nonzero(self.state[:self.CURRENT_EDGES])
+            if not self.is_red_clique_found and not self.is_blue_clique_found:
+                if np.all(self.state[:self.CURRENT_EDGES].astype(bool)):
+                    self.num_success = np.count_nonzero(self.state[:self.CURRENT_EDGES])
 
-                        if self.curr_size < self.max_nodes:
-                            reward = self.CURRENT_EDGES  # successfully colored all edges so far without clique
-                            self.red_graph.add_node(self.curr_size)
-                            self.blue_graph.add_node(self.curr_size)
-                            self.curr_size += 1
-                            self.CURRENT_EDGES = (self.curr_size * (self.curr_size - 1)) // 2
-                        else:
-                            reward = self.MAX_EDGES * 100  # successful reached goal
-                            self.is_done = True
+                    if self.curr_size < self.max_nodes:
+                        reward = self.CURRENT_EDGES  # successfully colored all edges so far without clique
+                        self.red_graph.add_node(self.curr_size)
+                        self.blue_graph.add_node(self.curr_size)
+                        self.curr_size += 1
+                        self.CURRENT_EDGES = (self.curr_size * (self.curr_size - 1)) // 2
                     else:
-                        if np.count_nonzero(self.state[:self.CURRENT_EDGES]) > self.num_success:
-                            reward = 1
-                            self.num_success = np.count_nonzero(self.state[:self.CURRENT_EDGES])
+                        reward = self.MAX_EDGES * 100  # successful reached goal
+                        self.is_done = True
                 else:
-                    reward = 0  # zero reward for making a clique
+                    if np.count_nonzero(self.state[:self.CURRENT_EDGES]) > self.num_success:
+                        reward = 1
+                        self.num_success = np.count_nonzero(self.state[:self.CURRENT_EDGES])
+            else:
+                reward = -10
+                self.done = True
         return reward
 
     def _color_edge(self, n1, n2, color):
