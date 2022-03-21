@@ -182,7 +182,7 @@ class RAGSEnv(gym.Env):
                     else:
                         reward = 1
                 else:
-                    reward = -1  # zero reward for making a clique
+                    reward = -100  # negative reward for making a clique
         return reward
 
     def _color_edge(self, n1, n2, color):
