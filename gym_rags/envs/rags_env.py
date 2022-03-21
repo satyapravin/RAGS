@@ -150,7 +150,7 @@ class RAGSEnv(gym.Env):
         elif action_idx not in [1, 2]:
             reward = -10  # punish for wrong color (if that ever happens)
         elif self.state[cell_idx] == action_idx:
-            reward = 0    # no reward for recoloring to same
+            reward = -1    # no reward for recoloring to same
         else:
             recolored = self.state[cell_idx] > 0 and not self.is_blue_clique_found and not self.is_red_clique_found
             self.state[cell_idx] = action_idx
