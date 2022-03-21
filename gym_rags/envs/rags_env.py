@@ -149,6 +149,8 @@ class RAGSEnv(gym.Env):
             reward = -10  # punish for coloring edge beyond current edge
         elif action_idx not in [1, 2]:
             reward = -10  # punish for wrong color (if that ever happens)
+        elif self.state[cell_idx] == action_idx:
+            reward = -10
         else:
             self.state[cell_idx] = action_idx
             self._color_edge(idx[0], idx[1], action_idx)
@@ -169,6 +171,8 @@ class RAGSEnv(gym.Env):
                     if np.count_nonzero(self.state[:self.CURRENT_EDGES]) > self.num_success:
                         reward = 1
                         self.num_success = np.count_nonzero(self.state[:self.CURRENT_EDGES])
+                    else:
+                        reward = -1
             else:
                 reward = -10
                 self.done = True
