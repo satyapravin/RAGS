@@ -145,8 +145,9 @@ class RAGSEnv(gym.Env):
         if cell_idx < self.MAX_EDGES:
             idx = self.indices[cell_idx]
 
-        recolored_cliq = self.state[cell_idx] > 0 and (self.is_blue_clique_found or self.is_red_clique_found)
-        recolored_free = self.state[cell_idx] > 0 and not self.is_blue_clique_found and not self.is_red_clique_found
+        recolored = self.state[cell_idx] > 0
+        had_clique = self.is_blue_clique_found or self.is_red_clique_found
+        was_free = not self.is_blue_clique_found and not self.is_red_clique_found
 
         if cell_idx >= self.CURRENT_EDGES:
             reward = -10  # punish for coloring edge beyond current edge
@@ -155,12 +156,12 @@ class RAGSEnv(gym.Env):
         else:
             self.state[cell_idx] = action_idx
             self._color_edge(idx[0], idx[1], action_idx)
-            if recolored_cliq:
+            if recolored and had_clique:
                 if not self.is_red_clique_found and not self.is_blue_clique_found:
                     reward = 100
                 else:
                     reward = 0
-            if recolored_free:
+            if recolored and was_free:
                 if self.is_red_clique_found or self.is_blue_clique_found:
                     reward = -1   # punish for recoloring when no cliques and resulting in a clique
                 else:
@@ -182,7 +183,10 @@ class RAGSEnv(gym.Env):
                     else:
                         reward = 1
                 else:
-                    reward = -100  # negative reward for making a clique
+                    if was_free:
+                        reward = -100  # negative reward for making a clique
+                    else:
+                        reward = 0
         return reward
 
     def _color_edge(self, n1, n2, color):
