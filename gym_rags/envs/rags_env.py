@@ -141,7 +141,7 @@ class RAGSEnv(gym.Env):
         cell_idx = action[0]
         action_idx = action[1] + 1
         reward = 0
-        idx = 0
+        idx = None
         if cell_idx < self.MAX_EDGES:
             idx = self.indices[cell_idx]
 
@@ -159,7 +159,7 @@ class RAGSEnv(gym.Env):
             if recolored:
                 if had_clique:
                     if not self.is_red_clique_found and not self.is_blue_clique_found:
-                        reward = 100
+                        reward = 10
                     else:
                         if is_same:
                             reward = -100
@@ -167,10 +167,10 @@ class RAGSEnv(gym.Env):
                             reward = -1
                 else:
                     if self.is_red_clique_found or self.is_blue_clique_found:
-                        reward = -100
+                        reward = -10
                     else:
                         if is_same:
-                            reward = -100
+                            reward = -10
                         else:
                             reward = -1
             else:
