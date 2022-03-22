@@ -161,20 +161,13 @@ class RAGSEnv(gym.Env):
                 if self.is_red_clique_found or self.is_blue_clique_found:
                     reward = -100
                     self.done = True
+                else:
+                    reward = 0
             else:
                 if not self.is_red_clique_found and not self.is_blue_clique_found:
                     if np.all(self.state[:self.CURRENT_EDGES].astype(bool)):
-                        self.num_success = np.count_nonzero(self.state[:self.CURRENT_EDGES])
-
-                        if self.curr_size < self.max_nodes:
-                            reward = self.CURRENT_EDGES  # successfully colored all edges so far without clique
-                            self.red_graph.add_node(self.curr_size)
-                            self.blue_graph.add_node(self.curr_size)
-                            self.curr_size += 1
-                            self.CURRENT_EDGES = (self.curr_size * (self.curr_size - 1)) // 2
-                        else:
-                            reward = self.MAX_EDGES * 100  # successful reached goal
-                            self.is_done = True
+                        reward = self.MAX_EDGES * 100  # successful reached goal
+                        self.is_done = True
                     else:
                         reward = 1
                 else:
