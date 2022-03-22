@@ -162,14 +162,14 @@ class RAGSEnv(gym.Env):
                     reward = -100
                     self.is_done = True
                 else:
-                    reward = -10
+                    reward = -1
             else:
                 if not self.is_red_clique_found and not self.is_blue_clique_found:
                     if np.all(self.state[:self.CURRENT_EDGES].astype(bool)):
                         reward = self.MAX_EDGES * 10000000  # successful reached goal
                         self.is_done = True
                     else:
-                        reward = 1
+                        reward = 100
                 else:
                     reward = -100
                     self.is_done = True
