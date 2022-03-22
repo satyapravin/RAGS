@@ -160,7 +160,7 @@ class RAGSEnv(gym.Env):
                 if not self.is_red_clique_found and not self.is_blue_clique_found:
                     reward = 100
                 else:
-                    reward = -1
+                    reward = 0
             if recolored and was_free:
                 if self.is_red_clique_found or self.is_blue_clique_found:
                     reward = -10  # punish for recoloring when no cliques and resulting in a clique
