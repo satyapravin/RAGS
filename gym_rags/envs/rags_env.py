@@ -153,14 +153,13 @@ class RAGSEnv(gym.Env):
         elif action_idx not in [1, 2]:
             reward = -100  # punish for wrong color (if that ever happens)
         elif is_same:
-            reward = -100
+            reward = -1
         else:
             self.state[cell_idx] = action_idx
             self._color_edge(idx[0], idx[1], action_idx)
             if recolored:
                 if self.is_red_clique_found or self.is_blue_clique_found:
                     reward = -1
-                    self.is_done = True
                 else:
                     reward = -1
             else:
@@ -172,7 +171,6 @@ class RAGSEnv(gym.Env):
                         reward = 1
                 else:
                     reward = -1
-                    self.is_done = True
         return reward
 
     def _color_edge(self, n1, n2, color):
