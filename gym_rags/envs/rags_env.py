@@ -153,7 +153,7 @@ class RAGSEnv(gym.Env):
         elif action_idx not in [1, 2]:
             reward = -100  # punish for wrong color (if that ever happens)
         elif is_same:
-            reward = -1
+            reward = -100
         else:
             self.state[cell_idx] = action_idx
             self._color_edge(idx[0], idx[1], action_idx)
