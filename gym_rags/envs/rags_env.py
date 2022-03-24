@@ -169,7 +169,7 @@ class RAGSEnv(gym.Env):
                         reward = self.MAX_EDGES * 100  # successful reached goal
                         self.is_done = True
                     else:
-                        reward = 1
+                        reward = 10
                 else:
                     reward = -1
                     self.is_done = True
