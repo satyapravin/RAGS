@@ -183,6 +183,9 @@ class RAGSEnv(gym.Env):
         return reward
 
     def _color_edge(self, n1, n2, color):
+        g = None
+        print('color', color)
+
         if color == 1:
             g = self.red_graph
             color_char = 'r'
