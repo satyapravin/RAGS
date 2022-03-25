@@ -161,6 +161,8 @@ class RAGSEnv(gym.Env):
                 if self.is_red_clique_found or self.is_blue_clique_found:
                     reward = -100
                     print("if")
+                    print(clique.graph_clique_number(self.red_graph))
+                    print(clique.graph_clique_number(self.blue_graph))
                     self.is_done = True
                 else:
                     reward = -1
@@ -174,6 +176,9 @@ class RAGSEnv(gym.Env):
                 else:
                     reward = -1
                     print("else")
+                    print(clique.graph_clique_number(self.red_graph))
+                    print(clique.graph_clique_number(self.blue_graph))
+
                     self.is_done = True
         return reward
 
