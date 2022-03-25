@@ -160,7 +160,6 @@ class RAGSEnv(gym.Env):
             if recolored:
                 if self.is_red_clique_found or self.is_blue_clique_found:
                     reward = -100
-                    print("if")
                     print(clique.graph_clique_number(self.red_graph))
                     print(clique.graph_clique_number(self.blue_graph))
                     self.is_done = True
@@ -175,17 +174,11 @@ class RAGSEnv(gym.Env):
                         reward = 10
                 else:
                     reward = -1
-                    print("else")
-                    print(clique.graph_clique_number(self.red_graph))
-                    print(clique.graph_clique_number(self.blue_graph))
-
                     self.is_done = True
         return reward
 
     def _color_edge(self, n1, n2, color):
         g = None
-        print('color', color)
-
         if color == 1:
             g = self.red_graph
             color_char = 'r'
@@ -195,10 +188,11 @@ class RAGSEnv(gym.Env):
         else:
             assert "Invalid color"
 
-        if not g.has_edge(n1, n2):
-            g.add_edge(n1, n2, color=color_char)
-        else:
-            networkx.set_edge_attributes(g, {(n1, n2): {"color": color_char}})
+        if g.has_edge(n1, n2):
+            g.remove_edge(n1, 2)
+
+        g.add_edge(n1, n2, color=color_char)
+        networkx.set_edge_attributes(g, {(n1, n2): {"color": color_char}})
         self.is_red_clique_found = clique.graph_clique_number(self.red_graph) >= self.red_clique_size
         self.is_blue_clique_found = clique.graph_clique_number(self.blue_graph) >= self.blue_clique_size
 
