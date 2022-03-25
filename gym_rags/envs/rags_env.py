@@ -188,8 +188,11 @@ class RAGSEnv(gym.Env):
         else:
             assert "Invalid color"
 
-        if g.has_edge(n1, n2):
-            g.remove_edge(n1, n2)
+        if self.red_graph.has_edge(n1, n2):
+            self.red_graph.remove_edge(n1, n2)
+
+        if self.blue_graph.has_edge(n1, n2):
+            self.blue_graph.remove_edge(n1, 2)
 
         g.add_edge(n1, n2, color=color_char)
         networkx.set_edge_attributes(g, {(n1, n2): {"color": color_char}})
