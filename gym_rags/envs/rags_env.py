@@ -151,7 +151,7 @@ class RAGSEnv(gym.Env):
         assert(cell_idx < self.MAX_EDGES)
         assert(0 < action_idx < 3)
         if is_same:
-            reward = -100
+            reward = -1
         else:
             self.state[cell_idx] = action_idx
             self._color_edge(idx[0], idx[1], action_idx)
