@@ -148,11 +148,9 @@ class RAGSEnv(gym.Env):
         is_same = self.state[cell_idx] == action_idx
         recolored = self.state[cell_idx] > 0
 
-        if cell_idx >= self.CURRENT_EDGES:
-            reward = -10  # punish for coloring edge beyond current edge
-        elif action_idx not in [1, 2]:
-            reward = -100  # punish for wrong color (if that ever happens)
-        elif is_same:
+        assert(cell_idx < self.MAX_EDGES)
+        assert(0 < action_idx < 3)
+        if is_same:
             reward = -100
         else:
             self.state[cell_idx] = action_idx
