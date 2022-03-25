@@ -61,7 +61,7 @@ class RAGSEnv(gym.Env):
         # Generate indices from state into graph matrix
         self.indices = {}
         counter = 0
-        for k1 in range(0, self.MAX_EDGES):
+        for k1 in range(1, self.MAX_EDGES):
             for k2 in range(0, k1):
                 self.indices[counter] = (k1, k2)
                 counter = counter + 1
@@ -189,7 +189,7 @@ class RAGSEnv(gym.Env):
             assert "Invalid color"
 
         if g.has_edge(n1, n2):
-            g.remove_edge(n1, 2)
+            g.remove_edge(n1, n2)
 
         g.add_edge(n1, n2, color=color_char)
         networkx.set_edge_attributes(g, {(n1, n2): {"color": color_char}})
