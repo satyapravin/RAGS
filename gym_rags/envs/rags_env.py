@@ -160,6 +160,7 @@ class RAGSEnv(gym.Env):
             if recolored:
                 if self.is_red_clique_found or self.is_blue_clique_found:
                     reward = -100
+                    print("if")
                     self.is_done = True
                 else:
                     reward = -1
@@ -172,6 +173,7 @@ class RAGSEnv(gym.Env):
                         reward = 10
                 else:
                     reward = -1
+                    print("else")
                     self.is_done = True
         return reward
 
