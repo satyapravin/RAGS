@@ -157,7 +157,7 @@ class RAGSEnv(gym.Env):
             self._color_edge(idx[0], idx[1], action_idx)
             if recolored:
                 if self.is_red_clique_found or self.is_blue_clique_found:
-                    reward = -1000
+                    reward = -1
                     self.is_done = True
                 else:
                     reward = -1
@@ -169,7 +169,7 @@ class RAGSEnv(gym.Env):
                     else:
                         reward = 10
                 else:
-                    reward = -1000
+                    reward = -1
                     self.is_done = True
         return reward
 
