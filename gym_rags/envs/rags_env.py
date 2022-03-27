@@ -175,7 +175,7 @@ class RAGSEnv(gym.Env):
                         reward = -2
                 else:
                     if had_clique:
-                        reward = 1
+                        reward = 2
                     else:
                         reward = 0
             else:
@@ -184,7 +184,7 @@ class RAGSEnv(gym.Env):
                         reward = self.MAX_EDGES * 100  # successful reached goal
                         self.is_done = True
                     else:
-                        reward = 1
+                        reward = 10
                 else:
                     reward = -2
         return reward
