@@ -163,11 +163,14 @@ class RAGSEnv(gym.Env):
             self._color_edge(idx[0], idx[1], action_idx)
             if recolored:
                 if self.is_red_clique_found or self.is_blue_clique_found:
-                    red_cliques_post = self.find_cliques(self.red_graph, self.red_clique_size)
-                    blue_cliques_post = self.find_cliques(self.blue_graph, self.blue_clique_size)
+                    if had_clique:
+                        red_cliques_post = self.find_cliques(self.red_graph, self.red_clique_size)
+                        blue_cliques_post = self.find_cliques(self.blue_graph, self.blue_clique_size)
 
-                    if red_cliques_post < red_cliques or blue_cliques_post < blue_cliques:
-                        reward = 0
+                        if red_cliques_post < red_cliques or blue_cliques_post < blue_cliques:
+                            reward = 0
+                        else:
+                            reward = -2
                     else:
                         reward = -2
                 else:
@@ -181,7 +184,7 @@ class RAGSEnv(gym.Env):
                         reward = self.MAX_EDGES * 100  # successful reached goal
                         self.is_done = True
                     else:
-                        reward = 10
+                        reward = 1
                 else:
                     reward = -2
         return reward
