@@ -151,16 +151,16 @@ class RAGSEnv(gym.Env):
         assert(cell_idx < self.MAX_EDGES)
         assert(0 < action_idx < 3)
         if is_same:
-            reward = 0
+            reward = -1
         else:
             self.state[cell_idx] = action_idx
             self._color_edge(idx[0], idx[1], action_idx)
             if recolored:
                 if self.is_red_clique_found or self.is_blue_clique_found:
-                    reward = -1
-                    #self.is_done = True
+                    reward = -100
+                    self.is_done = True
                 else:
-                    reward = 0
+                    reward = -1
             else:
                 if not self.is_red_clique_found and not self.is_blue_clique_found:
                     if np.all(self.state[:self.CURRENT_EDGES].astype(bool)):
@@ -169,8 +169,8 @@ class RAGSEnv(gym.Env):
                     else:
                         reward = 10
                 else:
-                    reward = -1
-                    #self.is_done = True
+                    reward = -100
+                    self.is_done = True
         return reward
 
     def _color_edge(self, n1, n2, color):
