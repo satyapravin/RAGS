@@ -148,11 +148,11 @@ class RAGSEnv(gym.Env):
 
         is_same = self.state[cell_idx] == action_idx
         recolored = self.state[cell_idx] > 0
-        had_clique = self.is_red_clique_found or self.is_blue_clique_found
+        # had_clique = self.is_red_clique_found or self.is_blue_clique_found
 
-        if had_clique:
-            red_cliques = self.find_cliques(self.red_graph, self.red_clique_size)
-            blue_cliques = self.find_cliques(self.blue_graph, self.blue_clique_size)
+        # if had_clique:
+        #    red_cliques = self.find_cliques(self.red_graph, self.red_clique_size)
+        #    blue_cliques = self.find_cliques(self.blue_graph, self.blue_clique_size)
 
         assert(cell_idx < self.MAX_EDGES)
         assert(0 < action_idx < 3)
@@ -163,21 +163,24 @@ class RAGSEnv(gym.Env):
             self._color_edge(idx[0], idx[1], action_idx)
             if recolored:
                 if self.is_red_clique_found or self.is_blue_clique_found:
-                    if had_clique:
-                        red_cliques_post = self.find_cliques(self.red_graph, self.red_clique_size)
-                        blue_cliques_post = self.find_cliques(self.blue_graph, self.blue_clique_size)
+                    # if had_clique:
+                    #    red_cliques_post = self.find_cliques(self.red_graph, self.red_clique_size)
+                    #    blue_cliques_post = self.find_cliques(self.blue_graph, self.blue_clique_size)
 
-                        if red_cliques_post < red_cliques or blue_cliques_post < blue_cliques:
-                            reward = 0
-                        else:
-                            reward = -2
-                    else:
-                        reward = -2
+                    #    if red_cliques_post < red_cliques or blue_cliques_post < blue_cliques:
+                    #        reward = 0
+                    #    else:
+                    #        reward = -2
+                    # else:
+                    #   reward = -2
+                    reward = -1
+                    self.is_done = True
                 else:
-                    if had_clique:
-                        reward = 2
-                    else:
-                        reward = 0
+                    # if had_clique:
+                    #    reward = 2
+                    # else:
+                    #    reward = 0
+                    reward = 0
             else:
                 if not self.is_red_clique_found and not self.is_blue_clique_found:
                     if np.all(self.state[:self.CURRENT_EDGES].astype(bool)):
@@ -186,7 +189,8 @@ class RAGSEnv(gym.Env):
                     else:
                         reward = 10
                 else:
-                    reward = -2
+                    reward = -1
+                    self.is_done = True
         return reward
 
     def _color_edge(self, n1, n2, color):
