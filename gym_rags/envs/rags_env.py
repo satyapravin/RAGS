@@ -167,7 +167,7 @@ class RAGSEnv(gym.Env):
                     blue_cliques_post = self.find_cliques(self.blue_graph, self.blue_clique_size)
 
                     if red_cliques_post < red_cliques or blue_cliques_post < blue_cliques:
-                        reward = 1
+                        reward = 0
                     else:
                         reward = -2
                 else:
