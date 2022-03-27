@@ -160,7 +160,7 @@ class RAGSEnv(gym.Env):
                     reward = -1
                     self.is_done = True
                 else:
-                    reward = -1
+                    reward = 0
             else:
                 if not self.is_red_clique_found and not self.is_blue_clique_found:
                     if np.all(self.state[:self.CURRENT_EDGES].astype(bool)):
