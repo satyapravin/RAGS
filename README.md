@@ -23,4 +23,4 @@ env = gym.make('RAGS-v0')
 
 ## The Environment
 
-Imagine you are coloring edges of a complete Graph with Red or Green colors such that there are no K monochromatic cliques.
+Imagine you are coloring edges of a complete Graph with Red or Blue colors such that there are no K monochromatic cliques.
