@@ -1,9 +1,9 @@
-This repository contains a PIP package which is an OpenAI environment for simulating an enironment in which graph edges are colored.
+This repository contains a PIP package which is an OpenAI environment for computing R(5, 7).
 
 
 ## Installation
 
-Install the [OpenAI gym](https://gym.openai.com/docs/).
+Install the [OpenAI gym](https://www.gymlibrary.ml/).
 
 Then install this package via
 
@@ -18,10 +18,9 @@ import gym
 import gym_rags
 
 # Graph with 8 nodes and no K5 red or K5 green cliques.
-env = gym.make('RAGS-v0', start_size=8, max_size=43, red_clique=5, blue_clique=5) 
+env = gym.make('RAGS-v0') 
 ```
-
 
 ## The Environment
 
-Imagine you are coloring edges of a complete Graph with Red or Green colors such that there are no K cliques.
+Imagine you are coloring edges of a complete Graph with Red or Green colors such that there are no K monochromatic cliques.
