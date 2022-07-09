@@ -13,7 +13,7 @@ import cfg_load
 import gym
 from gym import spaces
 import itertools
-from math import comb
+from scipy.special import comb
 import networkx
 from networkx.algorithms import clique
 import numpy as np
@@ -45,7 +45,7 @@ class RAGSEnv(gym.Env):
         self.is_done = False
         self.KCompletes = [(3, 3), (3, 4), (3, 5), (3, 6), (3, 7), (4, 4), (4, 5), (4, 6), (4, 7), (5, 5), (5, 6), (5, 7)]
         self.action_space = spaces.Discrete(2)
-        self.observation_space = np.zeros(combin(self.curr_size, 2))
+        self.observation_space = np.zeros(comb(self.curr_size, 2, exact=True))
 
     def step(self, action: Tuple[int, int]):
         if self.is_done:
