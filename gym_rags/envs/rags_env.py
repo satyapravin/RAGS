@@ -95,9 +95,8 @@ class RAGSEnv(gym.Env):
 
     
     def reset(self, seed=42):
-        self._init()
         np.random.seed(seed)
-        self.observation_space = np.zeros(combin(self.curr_size, 2))
+        self._init()
         self.red_graph = networkx.empty_graph(self.curr_size)
         self.blue_graph = networkx.empty_graph(self.curr_size)
         info = dict(red_graph=self.red_graph, blue_graph=self.blue_graph)
