@@ -35,7 +35,7 @@ class RAGSEnv(gym.Env):
     """
 
     def __init__(self, max_nodes=83):
-        self.__version__ = "0.0.1"
+        self.__version__ = "0"
         logging.info(f"RAGSEnv - Version {self.__version__}")
         self.max_nodes = max_nodes
         self._init()
